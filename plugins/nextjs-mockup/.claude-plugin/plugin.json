@@ -1,0 +1,9 @@
+{
+  "name": "nextjs-mockup",
+  "version": "1.0.0",
+  "description": "Next.js App Router モックアップへの機能追加ワークフロースキル",
+  "author": {
+    "name": "hico-mrmgn"
+  },
+  "repository": "https://github.com/hico-mrmgn/Skills"
+}
