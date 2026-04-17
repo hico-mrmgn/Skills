@@ -1,0 +1,9 @@
+{
+  "name": "vercel-deploy",
+  "version": "1.0.0",
+  "description": "Vercel デプロイ管理スキル（mrmgn チーム）",
+  "author": {
+    "name": "hico-mrmgn"
+  },
+  "repository": "https://github.com/hico-mrmgn/Skills"
+}
