@@ -1,0 +1,9 @@
+{
+  "name": "municipality-data",
+  "version": "1.0.0",
+  "description": "市区町村データ収集・スクレイピングワークフロースキル",
+  "author": {
+    "name": "hico-mrmgn"
+  },
+  "repository": "https://github.com/hico-mrmgn/Skills"
+}
