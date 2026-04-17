@@ -13,6 +13,9 @@
 | [lp-creator](./plugins/lp-creator/) | スタンドアロンLP（HTML/CSS/JS）の作成 | 「LPを作って」「〇〇のサイトを作って」「企業サイトを作りたい」 |
 | [vercel-deploy](./plugins/vercel-deploy/) | Vercel デプロイ管理・ログ確認・トラブルシュート | 「デプロイして」「ビルドが失敗した」「ログを見せて」 |
 | [playwright-test](./plugins/playwright-test/) | Playwright E2Eテスト作成・デバッグ | 「Playwrightでテストを書いて」「E2Eテストを追加したい」「テストが落ちている」 |
+| [data-analysis](./plugins/data-analysis/) | CSV/ExcelデータをPython/Pandasで分析・可視化 | 「CSVを分析して」「データを集計したい」「グラフを作って」 |
+| [business-email](./plugins/business-email/) | ビジネスメール・提案書・議事録などの文書作成 | 「メールを書いて」「提案書のドラフトを作りたい」「議事録を整理して」 |
+| [competitor-research](./plugins/competitor-research/) | 競合調査・比較表・市場分析レポートの作成 | 「競合を調査して」「他社と比較したい」「競合比較表を作って」 |
 
 ## インストール方法
 

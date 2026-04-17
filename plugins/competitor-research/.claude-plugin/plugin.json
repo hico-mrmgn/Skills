@@ -1,0 +1,9 @@
+{
+  "name": "competitor-research",
+  "version": "1.0.0",
+  "description": "競合調査・比較表・市場分析レポートの作成スキル",
+  "author": {
+    "name": "hico-mrmgn"
+  },
+  "repository": "https://github.com/hico-mrmgn/Skills"
+}
