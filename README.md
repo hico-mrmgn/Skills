@@ -16,6 +16,7 @@
 | [data-analysis](./plugins/data-analysis/) | CSV/ExcelデータをPython/Pandasで分析・可視化 | 「CSVを分析して」「データを集計したい」「グラフを作って」 |
 | [business-email](./plugins/business-email/) | ビジネスメール・提案書・議事録などの文書作成 | 「メールを書いて」「提案書のドラフトを作りたい」「議事録を整理して」 |
 | [competitor-research](./plugins/competitor-research/) | 競合調査・比較表・市場分析レポートの作成 | 「競合を調査して」「他社と比較したい」「競合比較表を作って」 |
+| [code-review](./plugins/code-review/) | コードを7軸で採点・分析しフィードバック | 「コードをレビューして」「採点して」「改善点を教えて」 |
 
 ## インストール方法
 
