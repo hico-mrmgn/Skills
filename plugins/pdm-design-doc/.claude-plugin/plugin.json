@@ -1,0 +1,9 @@
+{
+  "name": "pdm-design-doc",
+  "version": "1.0.0",
+  "description": "PdM Design Doc作成・仕様書変換ワークフロースキル",
+  "author": {
+    "name": "hico-mrmgn"
+  },
+  "repository": "https://github.com/hico-mrmgn/Skills"
+}
