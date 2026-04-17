@@ -1,6 +1,6 @@
 ---
 name: nextjs-mockup-feature
-description: Next.js App Router + Ports & Adapters アーキテクチャのモックアップに新機能を追加するワークフロースキル。「〇〇機能を追加して」「〇〇画面を作って」「モックデータを追加して」「新しいページを作りたい」など、Lipassやその他の Next.js モックアップへの機能追加・画面追加・モックデータ追加が絡む作業では必ずこのスキルを参照すること。
+description: Next.js App Router + Ports & Adapters アーキテクチャのモックアップに新機能を追加するワークフロースキル。「〇〇機能を追加して」「〇〇画面を作って」「モックデータを追加して」「新しいページを作りたい」など、Next.js モックアップへの機能追加・画面追加・モックデータ追加が絡む作業では必ずこのスキルを参照すること。
 ---
 
 # Next.js モックアップ 機能追加スキル
@@ -203,7 +203,7 @@ app/(main)/{feature}/
     └── page.tsx       # 新規作成（必要な場合）
 ```
 
-ファイル名はkebab-caseで、ドメイン用語はCLAUDE.mdのマッピングに従う（例：「意向確認」→ `intent-confirmation`）。
+ファイル名はkebab-caseで、ドメイン用語はCLAUDE.mdのマッピングに従う（例：「注文履歴」→ `order-history`）。
 
 ## Ports & Adapters パターンの実装
 
@@ -264,8 +264,8 @@ import { cn } from "@/lib/utils";
 - **`app/` からの非ルートimport禁止** — `app/` 内のコードは `src/` や `components/` をimportする。`app/` 内で別の `app/` ファイルをimportしない（`check-no-app-imports` リントで検出される）
 - **Path alias** — `@/*` はプロジェクトルートを指す
 - **RSC vs Client** — データ取得はRSCで行い、インタラクション（useState/useEffect）がある部分だけ `"use client"` を付ける
-- **モックデータのID形式** — 既存データのID命名規則に合わせる（例：`CUST-00001`、`IC-001`）
-- **ドメイン用語** — CLAUDE.mdのマッピング表を必ず確認する
+- **モックデータのID形式** — 既存データのID命名規則に合わせる（例：`USER-001`、`ITEM-00001`）
+- **ドメイン用語** — CLAUDE.mdにマッピング表があれば必ず確認する
 
 ## 実装後の確認
 
