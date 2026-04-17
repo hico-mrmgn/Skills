@@ -12,6 +12,7 @@
 | [report-generator](./plugins/report-generator/) | 自治体向け実施報告書（.docx）・スライド（.pptx）の自動生成 | 「〇〇町の報告書を作って」「スライドを生成して」 |
 | [lp-creator](./plugins/lp-creator/) | スタンドアロンLP（HTML/CSS/JS）の作成 | 「LPを作って」「〇〇のサイトを作って」「企業サイトを作りたい」 |
 | [vercel-deploy](./plugins/vercel-deploy/) | Vercel デプロイ管理・ログ確認・トラブルシュート | 「デプロイして」「ビルドが失敗した」「ログを見せて」 |
+| [playwright-test](./plugins/playwright-test/) | Playwright E2Eテスト作成・デバッグ | 「Playwrightでテストを書いて」「E2Eテストを追加したい」「テストが落ちている」 |
 
 ## インストール方法
 
