@@ -1,0 +1,9 @@
+{
+  "name": "claude-code-workflow",
+  "version": "1.0.0",
+  "description": "Claude Code を使った日次コード分析・自動リファクタリングパイプラインの設計・構築・改善スキル",
+  "author": {
+    "name": "hico-mrmgn"
+  },
+  "repository": "https://github.com/hico-mrmgn/Skills"
+}
