@@ -1,6 +1,6 @@
 # Hooks
 
-自動実行型のHook設定テンプレート（Level 4）。
+自動実行型のHook設定テンプレート。
 プロジェクトの `.claude/settings.json` にコピーして使う。
 
 ## ファイル一覧

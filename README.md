@@ -2,29 +2,27 @@
 
 個人用 Claude Code スキル・エージェント・Hook設定のマーケットプレイス。
 
-Level 3（Skills）・Level 4（Hooks/Workflows）・Level 5（Agents）の3層構造で育てる。
-
 ---
 
 ## 構造
 
 ```
 Skills/
-├── plugins/       # Level 3: 明示呼び出し型スキル（/skill-name で使う）
-├── agents/        # Level 5: 並行レビュー型エージェント（観点ごとに分担）
-├── hooks/         # Level 4: Hook設定テンプレート（ファイル保存時・応答終了時）
+├── plugins/       # 明示呼び出し型スキル（/skill-name で使う）
+├── agents/        # 並行レビュー型エージェント（観点ごとに分担）
+├── hooks/         # Hook設定テンプレート（ファイル保存時・応答終了時）
 ├── templates/     # 新規プロジェクト初期化用の雛形
 └── .github/
-    └── workflows/ # Level 4: Reusable Workflow（夜間レビュー・PR自動レビュー）
+    └── workflows/ # Reusable Workflow（夜間レビュー・PR自動レビュー）
 ```
 
-### 3層の使い分け
+### 使い分け
 
-| 層 | 場所 | 動き方 | 使う場面 |
+| 種類 | 場所 | 動き方 | 使う場面 |
 |---|---|---|---|
-| Skills（Level 3） | `plugins/` | 明示的に呼び出す | 「〇〇して」と指示したとき |
-| Hooks（Level 4） | `hooks/`, `workflows/` | 自動実行 | ファイル保存時・会話終了時・夜間 |
-| Agents（Level 5） | `agents/` | 並行実行 | コードレビューを観点ごとに分担させたいとき |
+| Skills | `plugins/` | 明示的に呼び出す | 「〇〇して」と指示したとき |
+| Hooks | `hooks/`, `workflows/` | 自動実行 | ファイル保存時・会話終了時・夜間 |
+| Agents | `agents/` | 並行実行 | コードレビューを観点ごとに分担させたいとき |
 
 ---
 
