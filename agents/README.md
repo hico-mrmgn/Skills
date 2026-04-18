@@ -13,6 +13,7 @@
 | [security-reviewer](./security-reviewer.md) | セキュリティ | OWASP Top 10・秘密情報露出 |
 | [naming-reviewer](./naming-reviewer.md) | 命名・可読性 | 型情報混入・意味のない名前・動詞なし関数名 |
 | [dead-code-reviewer](./dead-code-reviewer.md) | デッドコード | _リネーム・コメントアウト・未使用import |
+| [type-safety-reviewer](./type-safety-reviewer.md) | 型安全性 | `any`・型アサーション・非null assertion・網羅性 |
 
 ## 使い方
 

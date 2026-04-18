@@ -35,5 +35,11 @@ cp /path/to/Skills/templates/settings.json.template .claude/settings.json
 | `{{TECH_SPECIFIC_RULES}}` | 技術スタック固有のルール |
 | `{{NAMING_CONVENTIONS}}` | 命名規則 |
 | `{{DIRECTORY_STRUCTURE}}` | ディレクトリ構造の説明 |
+| `{{INSTALL_CMD}}` | 依存インストールコマンド（例：`pnpm install`） |
+| `{{DEV_CMD}}` | 開発サーバー起動コマンド |
+| `{{TEST_CMD}}` | テスト実行コマンド |
+| `{{LINT_CMD}}` | Lint / Format コマンド |
+| `{{TYPECHECK_CMD}}` | 型チェックコマンド |
+| `{{BUILD_CMD}}` | ビルドコマンド |
 | `{{CUSTOM_SKILLS}}` | プロジェクト固有のスキル |
 | `{{PROJECT_NOTES}}` | プロジェクト固有のメモ |
