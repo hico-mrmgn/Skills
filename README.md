@@ -1,8 +1,34 @@
 # Skills
 
-個人用 Claude Code スキル・プラグインのマーケットプレイス。
+個人用 Claude Code スキル・エージェント・Hook設定のマーケットプレイス。
 
-## プラグイン一覧
+Level 3（Skills）・Level 4（Hooks/Workflows）・Level 5（Agents）の3層構造で育てる。
+
+---
+
+## 構造
+
+```
+Skills/
+├── plugins/       # Level 3: 明示呼び出し型スキル（/skill-name で使う）
+├── agents/        # Level 5: 並行レビュー型エージェント（観点ごとに分担）
+├── hooks/         # Level 4: Hook設定テンプレート（ファイル保存時・応答終了時）
+├── templates/     # 新規プロジェクト初期化用の雛形
+└── .github/
+    └── workflows/ # Level 4: Reusable Workflow（夜間レビュー・PR自動レビュー）
+```
+
+### 3層の使い分け
+
+| 層 | 場所 | 動き方 | 使う場面 |
+|---|---|---|---|
+| Skills（Level 3） | `plugins/` | 明示的に呼び出す | 「〇〇して」と指示したとき |
+| Hooks（Level 4） | `hooks/`, `workflows/` | 自動実行 | ファイル保存時・会話終了時・夜間 |
+| Agents（Level 5） | `agents/` | 並行実行 | コードレビューを観点ごとに分担させたいとき |
+
+---
+
+## プラグイン（Skills）一覧
 
 | プラグイン | 説明 | トリガーワード例 |
 |---|---|---|
@@ -18,30 +44,29 @@
 | [competitor-research](./plugins/competitor-research/) | 競合調査・比較表・市場分析レポートの作成 | 「競合を調査して」「他社と比較したい」「競合比較表を作って」 |
 | [code-review](./plugins/code-review/) | コードを7軸で採点・分析しフィードバック | 「コードをレビューして」「採点して」「改善点を教えて」 |
 
+---
+
+## エージェント（Agents）一覧
+
+並行レビュー型。各エージェントは1つの観点だけを担当する。
+
+| エージェント | 観点 |
+|---|---|
+| [yagni-reviewer](./agents/yagni-reviewer.md) | スコープ遵守・YAGNI |
+| [abstraction-reviewer](./agents/abstraction-reviewer.md) | 抽象化の適切さ |
+| [comment-reviewer](./agents/comment-reviewer.md) | コメントの品質 |
+| [error-handling-reviewer](./agents/error-handling-reviewer.md) | エラーハンドリング |
+| [security-reviewer](./agents/security-reviewer.md) | セキュリティ |
+| [naming-reviewer](./agents/naming-reviewer.md) | 命名・可読性 |
+| [dead-code-reviewer](./agents/dead-code-reviewer.md) | デッドコード |
+
+---
+
 ## インストール方法
 
-Claude Code で以下を実行:
+### Skills（プラグイン）
 
-```
-/plugin install plugin-name@my-skills
-```
-
-## ディレクトリ構造
-
-```
-Skills/
-└── plugins/
-    └── plugin-name/
-        ├── .claude-plugin/
-        │   └── plugin.json     # プラグインのマニフェスト
-        └── skills/
-            └── skill-name/
-                └── SKILL.md    # スキル定義
-```
-
-## マーケットプレイス登録設定
-
-`~/.claude/settings.json` に以下を追加済み:
+`~/.claude/settings.json` にマーケットプレイス登録を追加：
 
 ```json
 "extraKnownMarketplaces": {
@@ -53,3 +78,49 @@ Skills/
   }
 }
 ```
+
+その後、Claude Code で：
+
+```
+/plugin install plugin-name@my-skills
+```
+
+### Agents（エージェント）
+
+プロジェクトの `.claude/agents/` にコピー：
+
+```bash
+cp /path/to/Skills/agents/*.md .claude/agents/
+```
+
+### Hooks
+
+プロジェクトの `.claude/settings.json` に `hooks/common.json` の内容をマージ：
+
+```bash
+# 雛形からsettings.jsonを作成
+cp /path/to/Skills/templates/settings.json.template .claude/settings.json
+```
+
+### Reusable Workflow（夜間レビュー）
+
+プロジェクトの `.github/workflows/nightly.yml` に：
+
+```yaml
+jobs:
+  review:
+    uses: hico-mrmgn/Skills/.github/workflows/nightly-review.yml@main
+    with:
+      target_paths: "src/**"
+    secrets:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+```
+
+---
+
+## 育て方のルール
+
+- 同じ手順を2回書いたら → `plugins/` にSkillを追加
+- 同じレビュー指摘を2回したら → `agents/` にAgentを追加
+- 同じ手動チェックを2回したら → `hooks/` か `workflows/` に自動化を追加

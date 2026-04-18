@@ -1,0 +1,141 @@
+name: Nightly Code Review (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      target_paths:
+        description: "レビュー対象のパスパターン（例: src/**/*.ts）"
+        type: string
+        default: "src/**"
+      base_branch:
+        description: "比較ベースブランチ"
+        type: string
+        default: "main"
+      issue_label:
+        description: "作成するIssueのラベル"
+        type: string
+        default: "nightly-review"
+      notify_slack:
+        description: "Slack通知を送るか"
+        type: boolean
+        default: true
+    secrets:
+      ANTHROPIC_API_KEY:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: false
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ inputs.base_branch }}...HEAD -- '${{ inputs.target_paths }}' | head -50)
+          echo "files=$CHANGED" >> $GITHUB_OUTPUT
+          echo "変更ファイル数: $(echo "$CHANGED" | wc -l)"
+
+      - name: Run Claude Code review
+        if: steps.changed.outputs.files != ''
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_tools: "Bash,Read,Glob,Grep"
+          direct_prompt: |
+            以下の変更ファイルをコードレビューしてください。
+
+            対象ファイル:
+            ${{ steps.changed.outputs.files }}
+
+            ## レビュー手順
+
+            1. 各ファイルを Read で読み込む
+            2. 以下の観点でレビュー：
+               - セキュリティ（最優先：XSS・SQLi・秘密情報露出）
+               - YAGNI / スコープ遵守
+               - デッドコード・後方互換ハック
+               - 型安全性（TypeScriptの場合）
+            3. 問題がなければ「問題なし」と明記する
+
+            ## 出力フォーマット（JSON）
+
+            ```json
+            {
+              "summary": "全体的な所見を1〜2文で",
+              "issues": [
+                {
+                  "file": "ファイルパス",
+                  "severity": "high|medium|low",
+                  "category": "security|yagni|dead-code|type-safety|other",
+                  "line": 行番号,
+                  "description": "問題の説明",
+                  "suggestion": "修正案"
+                }
+              ],
+              "issue_title": "GitHubに起票するIssueのタイトル",
+              "issue_body": "GitHubに起票するIssueの本文（Markdown）"
+            }
+            ```
+
+            issuesが空配列の場合はissue_titleを空文字にすること。
+
+      - name: Parse review result and create issue
+        if: steps.changed.outputs.files != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEW_OUTPUT: ${{ steps.claude-code-action.outputs.output }}
+        run: |
+          TITLE=$(echo "$REVIEW_OUTPUT" | python3 -c "
+          import sys, json, re
+          text = sys.stdin.read()
+          match = re.search(r'\{.*\}', text, re.DOTALL)
+          if match:
+              data = json.loads(match.group())
+              print(data.get('issue_title', ''))
+          ")
+
+          if [ -n "$TITLE" ]; then
+            BODY=$(echo "$REVIEW_OUTPUT" | python3 -c "
+          import sys, json, re
+          text = sys.stdin.read()
+          match = re.search(r'\{.*\}', text, re.DOTALL)
+          if match:
+              data = json.loads(match.group())
+              print(data.get('issue_body', ''))
+          ")
+            gh issue create \
+              --title "$TITLE" \
+              --body "$BODY" \
+              --label "${{ inputs.issue_label }}"
+            echo "Issue作成完了: $TITLE"
+          else
+            echo "問題なし。Issueは作成しません。"
+          fi
+
+      - name: Notify Slack
+        if: inputs.notify_slack && always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URLが設定されていません。スキップします。"
+            exit 0
+          fi
+
+          STATUS="${{ job.status }}"
+          REPO="${{ github.repository }}"
+          RUN_URL="${{ github.server_url }}/$REPO/actions/runs/${{ github.run_id }}"
+
+          curl -s -X POST "$SLACK_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "{\"text\": \"[$REPO] 夜間レビュー完了: $STATUS\n$RUN_URL\"}"

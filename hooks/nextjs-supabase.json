@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get(\\\"file_path\\\", d.get(\\\"new_string\\\", \\\"\\\").split(\\\"\\\\n\\\")[0]))\"); if [[ \"$FILE\" =~ \\.(ts|tsx|js|jsx)$ ]]; then npx prettier --write \"$FILE\" 2>/dev/null && echo \"Formatted: $FILE\"; fi'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if [ -f tsconfig.json ]; then npx tsc --noEmit 2>&1 | tail -20; fi'"
+          }
+        ]
+      }
+    ]
+  }
+}
