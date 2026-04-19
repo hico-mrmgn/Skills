@@ -1,0 +1,209 @@
+name: Nightly Refactoring (Reusable)
+
+# 使い方（呼び出し側）:
+#
+# jobs:
+#   refactor:
+#     uses: hico-mrmgn/Skills/.github/workflows/nightly-refactor.yml@main
+#     with:
+#       notify_slack: true
+#     secrets:
+#       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+#       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+on:
+  workflow_call:
+    inputs:
+      notify_slack:
+        description: "Slack通知を送るか"
+        type: boolean
+        default: true
+    secrets:
+      ANTHROPIC_API_KEY:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: false
+
+jobs:
+  refactor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       # ブランチ作成・コミット・プッシュ
+      pull-requests: write  # PR作成
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run Claude Code nightly refactoring
+        id: refactor
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_tools: "Bash,Read,Write,Edit,Glob,Grep"
+          direct_prompt: |
+            ## 実行モード
+
+            このタスクは完全自律実行モードで動作します。
+
+            - すべてのツール実行・ファイル編集・git操作を確認なしで実施する
+            - ユーザーへの質問や中断は行わない
+            - 判断に迷う場合は保守的な変更（小さいスコープ）を選択して進める
+            - Pull Request を作成して完了
+
+            ---
+
+            ## ▼ STEP 1｜本日のスコープ確認
+
+            以下のコマンドで直近の変更を確認し、リファクタリング対象を **1〜3件** に絞る。
+            ```bash
+            git log --since="yesterday" --name-only --pretty=format: | sort | uniq
+            git diff --stat HEAD~1
+            ```
+
+            **除外対象（選定しない）：**
+            - `*.test.ts` / `*.spec.ts`
+            - `*.generated.ts` / `*.d.ts`
+            - `vite.config.ts` / `tailwind.config.ts` などの設定ファイル
+            - `node_modules/` / `.next/` / `dist/` 配下
+
+            **変更がない場合は以下の優先順で未着手ファイルを選択：**
+            1. `src/features/` 配下のドメインロジック
+            2. `src/components/` 配下の大型コンポーネント（200行超）
+            3. `src/hooks/` 配下のカスタムフック
+
+            ---
+
+            ## ▼ STEP 2｜対象ファイルの現状スキャン
+
+            選定したファイルごとに以下をチェックする。
+
+            ### 🔷 型安全性（TypeScript）
+            - [ ] `any` 型が使われていないか
+            - [ ] Props / 関数の引数・返り値に型定義があるか
+            - [ ] API レスポンスに型（zod / interface）が当たっているか
+            - [ ] union型・discriminated union で状態を表現できているか
+            - [ ] 型アサーション（`as`）の乱用がないか
+
+            ### 🔶 責務分離・構造整理
+            - [ ] 1コンポーネント or 1関数が複数の責務を持っていないか
+            - [ ] ビジネスロジックが UI コンポーネントに混在していないか
+            - [ ] カスタムフックに切り出せるロジックが残っていないか
+            - [ ] repository pattern（A案: mock維持 + 将来DB接続可能な構造）に沿っているか
+            - [ ] 定数・設定値がハードコードされていないか
+
+            ---
+
+            ## ▼ STEP 3｜ブランチ作成とリファクタリング実施
+
+            **作業前にブランチを作成する（既存ブランチがある場合はそちらに切り替え）：**
+            ```bash
+            git checkout -b refactor/daily-$(date +%Y%m%d) 2>/dev/null \
+              || git checkout refactor/daily-$(date +%Y%m%d)
+            ```
+
+            STEP 2 で検出した問題点を以下のルールで修正する。
+
+            **修正ルール：**
+            - 動作を変えない（ふるまいを保証したまま構造だけ改善する）
+            - 1ファイルの修正は1コミット単位で完結させる
+            - 型定義ファイルは `src/types/` に集約する
+            - 新規フックは `src/hooks/use{FeatureName}.ts` の命名規則に従う
+            - repository interface を変更する場合は必ず mock 実装も合わせて修正する
+
+            ---
+
+            ## ▼ STEP 4｜動作確認
+
+            リファクタリング後、以下を実行して壊れていないことを確認する。
+            ```bash
+            # 型チェック
+            npx tsc --noEmit
+
+            # テストが存在する場合のみ実行
+            if grep -q '"test"' package.json 2>/dev/null; then
+              npm run test -- --passWithNoTests
+            fi
+            ```
+
+            エラーが出た場合は修正してから次のステップへ進む。
+
+            ---
+
+            ## ▼ STEP 5｜変更確認とコミット
+
+            **変更がない場合は正常終了する（PRは作成しない）：**
+            ```bash
+            if git diff --quiet && git diff --cached --quiet; then
+              echo "変更なし：リファクタリング不要と判断しました"
+              exit 0
+            fi
+            ```
+
+            **変更がある場合はコミットする：**
+            ```bash
+            # 機能名はファイルパスから自動生成（例: src/features/auth/login.ts → "auth/login"）
+            git add -u
+            git commit -m "refactor: [対象機能名] 型安全性・責務分離の改善 ($(date +%Y-%m-%d))"
+            ```
+
+            ---
+
+            ## ▼ STEP 6｜Pull Request 作成
+
+            PR 本文をファイルに書き出してから作成する。
+            ```bash
+            cat > /tmp/pr_body.md << 'PREOF'
+            ## 📋 リファクタリングレポート
+
+            | # | ファイル | 修正カテゴリ | 具体的な変更内容 |
+            |---|---------|------------|----------------|
+            [変更内容の表をここに記載]
+
+            ## 未対応・次回持ち越し
+            - （あれば記載）
+
+            ## 気づいた設計上の懸念点
+            以下を能動的に確認して記載すること：
+            - 循環依存の疑いがある import
+            - Props drilling が3階層以上になっている箇所
+            - 今回のスコープ外だが次回対象にすべきファイル
+
+            ## チェック項目
+            - [ ] 動作変更なし（ふるまい保持）
+            - [ ] `tsc --noEmit` が通過
+            - [ ] テストが通過（または対象テストなし）
+            - [ ] 型安全性の改善
+            - [ ] 責務分離の改善
+
+            🤖 Generated with Claude Code (daily-code-refactoring scheduled task)
+            PREOF
+
+            gh pr create \
+              --title "refactor: [対象機能名] 型安全性・責務分離の改善 ($(date +%Y-%m-%d))" \
+              --body-file /tmp/pr_body.md
+            ```
+
+      - name: Notify Slack
+        if: inputs.notify_slack && always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URLが設定されていません。スキップします。"
+            exit 0
+          fi
+
+          STATUS="${{ job.status }}"
+          REPO="${{ github.repository }}"
+          RUN_URL="${{ github.server_url }}/$REPO/actions/runs/${{ github.run_id }}"
+
+          curl -s -X POST "$SLACK_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "{\"text\": \"[$REPO] 夜間リファクタリング完了: $STATUS\n$RUN_URL\"}"

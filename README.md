@@ -107,9 +107,9 @@ cp /path/to/Skills/templates/settings.json.template .claude/settings.json
 ```yaml
 jobs:
   review:
-    uses: hico-mrmgn/Skills/.github/workflows/nightly-review.yml@main
+    uses: hico-mrmgn/Skills/.github/workflows/nightly-refactor.yml@main
     with:
-      target_paths: "src/**"
+      notify_slack: true
     secrets:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
