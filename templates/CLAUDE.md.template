@@ -1,72 +1,223 @@
-# {{PROJECT_NAME}} - Claude Code 運用ガイド
+# CLAUDE.md — <!-- TODO: プロジェクト名（例: iju-jissen） -->
 
-## プロジェクト概要
-
-- **プロジェクト名：** {{PROJECT_NAME}}
-- **技術スタック：** {{TECH_STACK}}
-- **リポジトリ：** {{REPO_URL}}
+このファイルは Claude Code がこのリポジトリで作業する際に**毎回必ず読む**ガイドです。プロジェクト固有の制約・禁則・進行中のフェーズが書かれています。
 
 ---
 
-## 基本原則
+## このプロジェクトは何か
 
-コードを変更するときは、以下の原則を守ること。
+<!-- TODO: 以下の形式で書く
+- 誰が運営・開発しているか
+- 誰が使うか（ロール名も含めて）
+- 主な機能
+- 現状（どこまで動いているか）
+- これからやること
+- このプロジェクトの目的（学習なのか本番運用なのか）
 
-1. **依頼されたことだけをやる** — 依頼外の改善・リファクタリングは提案に留め、勝手にやらない
-2. **既存コードを読んでから変更する** — 読んでいないコードは修正しない
-3. **セキュリティ問題は最優先で報告する** — 発見したら作業を止めて先に伝える
-4. **不確かなときは確認する** — 推測で進めない
+例:
+一般社団法人「移住のすゝめ」が運営する **移住コーディネーター実践講座** の運営管理 Web アプリです。
+- **使う人**: スタッフ(管理者)、講師、受講生(LEARNER)
+- **主な機能**: 受講者管理、講座・レッスン・テスト、課題提出と評価、入金管理、修了証発行
+- **現状**: Phase 1 完了。Supabase + Drizzle によるバックエンド移行、Supabase Auth 導入、Vercel 本番デプロイ稼働中。
+- **これからやること**: デザイントークン導入(Phase 2)および機能拡張(Phase 3)。
+-->
 
 ---
 
-## 技術スタックと制約
+## フェーズと現在地
 
-### {{TECH_STACK}} 固有ルール
+<!-- TODO: フェーズ管理をしている場合は書く。シンプルな場合は「現在の作業内容」だけでもOK。
 
-{{TECH_SPECIFIC_RULES}}
+例:
+- **Phase 0**: フロントモック完成（完了）
+- **Phase 1**: DBマイグレーション・Auth導入・本番デプロイ（完了）
+- **Phase 2: 現在のフェーズ**。デザイントークン導入。
+- **Phase 3**: 機能拡張。
 
-### 命名規則
+**Phase 1 完了の確認**:
+1. `lib/mock-db.ts` は存在しない
+2. Supabase Auth で全ロールがログインできる
+...など、「完了した」ことを確認できるチェックリスト形式にしておくと、Claude が誤って古い方法を参照しなくなる。
+-->
 
-{{NAMING_CONVENTIONS}}
+---
+
+## 絶対に守ること（Hard Rules）
+
+### R1. 依頼されたことだけをやる
+
+依頼外のリファクタリング・改善・クリーンアップは**提案に留める**。勝手に実施しない。
+「ついでにここも直そう」という判断はオーナーだけがする。
+
+### R2. 既存コードを読んでから変更する
+
+読んでいないコードは修正しない。変更前に必ず該当ファイルを Read する。
+
+### R3. セキュリティ問題は最優先で報告する
+
+脆弱性を発見したら、他の作業を止めて先に伝える。軽微でも黙って進まない。
+
+### R4. 不確かなときは確認する
+
+推測で進めない。特に以下のケースは必ず確認：
+- 既存の関数シグネチャを変更したい
+- スコープ外のファイルを触る必要がある
+- このドキュメントの Hard Rules と矛盾する選択をする必要がある
+
+### R5. 「全部書き直したほうが早い」という提案をしない
+
+差分を最小にする方針で、既存コードを尊重して進める。
+
+---
+
+<!-- TODO: プロジェクト固有のHard Rulesをここに追加する
+例（Supabase を使っている場合）:
+
+### R6. service_role キーをクライアント側に出さない
+`SUPABASE_SERVICE_ROLE_KEY` は Server Action / Server Component / API Route の中だけで使う。
+`'use client'` のファイルや `NEXT_PUBLIC_*` 環境変数として絶対に出さない。
+
+### R7. RLS を無効化する提案をしない
+「テストのために RLS を一時的に切ろう」という提案はしない。
+RLS で詰まったら、ポリシーの書き方を直して解決する。
+
+### R8. マイグレーションは必ず Drizzle Kit で生成する
+`drizzle-kit generate` で生成し、`drizzle-kit migrate` で適用する。
+Supabase Studio の SQL Editor で直接 DDL を流さない。
+-->
 
 ---
 
 ## ディレクトリ構造
 
+<!-- TODO: 主要ディレクトリとその役割を書く。全ファイルを書く必要はない。
+「このディレクトリは何をする場所か」がわかるレベルで十分。
+
+例:
 ```
-{{DIRECTORY_STRUCTURE}}
+app/
+  (admin)/          # 管理者用ページ群
+  (learner)/        # 受講者用ページ群
+  api/              # Route Handler
+  auth-actions.ts   # 認証関連 Server Actions
+  actions.ts        # ドメイン Server Actions
+components/
+  ui/               # shadcn コンポーネント
+db/
+  schema.ts         # Drizzle スキーマ（ここがSingle Source of Truth）
+  migrations/       # drizzle-kit generate の出力（手動編集禁止）
+  queries.ts        # 全 Drizzle クエリ関数
+lib/
+  supabase/
+    server.ts       # Server Component / Server Action 用クライアント
+    client.ts       # Client Component 用クライアント
 ```
+-->
 
 ---
 
-## 自動化設定
+## 技術スタック
 
-### Agents（並行レビュー）
+<!-- TODO: 使っているものと、特に注意が必要なバージョンを書く。
 
-`.claude/agents/` に以下のエージェントを配置済み：
-
-- `security-reviewer.md` — セキュリティ観点（最優先）
-- `yagni-reviewer.md` — スコープ遵守・YAGNI
-- `dead-code-reviewer.md` — デッドコード検出
-
-コードレビューが必要なときは「並行でレビューして」と指示すると各エージェントが同時に走る。
-
-### GitHub Actions
-
-夜間リファクタリング・PR自動レビューは `hico-mrmgn/Skills` の Reusable Workflow を使用。
-設定は `.github/workflows/` を参照。
+例（Next.js + Supabase の場合）:
+- **Frontend**: Next.js x.x（App Router）/ React / TypeScript strict / Tailwind / shadcn-ui
+- **DB**: Supabase Postgres
+- **ORM**: Drizzle ORM + drizzle-kit
+- **Auth**: Supabase Auth + RLS
+- **Hosting**: Vercel
+- **CI**: GitHub Actions
+- **Lint/Format**: Biome
+- **Test**: Vitest + Playwright（E2E）
+- **監視**: Sentry
+-->
 
 ---
 
-## よく使うスキル
+## ドメインモデル
+
+<!-- TODO: 主要テーブル・モデルとその関係を書く。
+型定義ファイルのパスだけでも書いておくと Claude がすぐに参照できる。
+
+例:
+スキーマは `db/schema.ts` を参照。主要なテーブル：
+- `User` — ロール(LEARNER/ADMIN)・入学ステータスを持つ
+- `Lesson` / `LessonProgress` — チャプターとその進捗
+- `Assignment` — 課題提出と評価
+- `Payment` — 入金管理
+
+ID体系: `lib/format.ts` の `generateId(prefix)` で生成。`USR-001` 形式。
+-->
+
+---
+
+## よくある事故パターンと予防
+
+<!-- TODO: このプロジェクトで実際に起きた、または起きそうな間違いを書く。
+「Claude がやりがちなこと」を書くと効果が高い。
+
+汎用的な例:
+- 「認証状態を localStorage に保存しよう」→ Supabase セッションを使う
+- 「RLS が動かないので一旦オフにして」→ オフにしない。ポリシーを直す
+- 「型アサーション(as)で一旦解決しよう」→ 型を正しく定義する
+
+プロジェクト固有の例を追記する:
+-->
+
+### 事故: 「ついでに隣のコンポーネントも直そう」
+→ R1 違反。依頼スコープ外のファイルは触らない。
+
+---
+
+## 作業時の必須プロセス
+
+### 作業開始時
+
+1. この CLAUDE.md を読む
+2. 現在のフェーズと禁則を確認する
+3. 対象ファイルを Read してから作業を始める
+
+### コード変更後
+
+<!-- TODO: プロジェクトに合わせて確認コマンドを書く。
+
+例:
+- `npm run build` が通る
+- `npx tsc --noEmit` で型エラーがゼロ
+- `npx biome check src/` でlintエラーがゼロ
+-->
+
+### 完了報告時
+
+- 何を変更したか（ファイル名・変更内容）
+- 何を変更しなかったか（スコープ外として残したもの）
+- 確認できなかったこと（テスト未実施など）
+
+---
+
+## スキルとエージェント
+
+### 使えるスキル（`my-skills` マーケットプレイス）
 
 | スキル | 使うタイミング |
 |---|---|
-| `/code-review` | コードの品質を7軸で採点したいとき |
-| {{CUSTOM_SKILLS}} |
+| `code-review` | コードの品質を7軸で採点したいとき |
+| `playwright-test` | E2Eテストを書くとき |
+| `vercel-deploy` | デプロイ状況を確認するとき |
+
+<!-- TODO: このプロジェクトでよく使うスキルを追加する -->
+
+### 並行レビュー（`.claude/agents/`）
+
+コードレビューが必要なときは「並行でレビューして」と指示する。以下のエージェントが同時に走る：
+
+- `security-reviewer` — セキュリティ観点（最優先）
+- `yagni-reviewer` — スコープ遵守・YAGNI
+- `dead-code-reviewer` — デッドコード検出
 
 ---
 
-## プロジェクト固有メモ
+## 詰まったら
 
-{{PROJECT_NOTES}}
+オーナーに質問する。**勝手に方針を変えない**。
+迷ったら止まる。これが個人開発でいちばん大事な安全装置です。
