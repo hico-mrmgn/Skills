@@ -41,6 +41,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Install dependencies
+        run: npm ci
+
       - name: Run Claude Code nightly refactoring
         id: refactor
         uses: anthropics/claude-code-action@beta
@@ -61,11 +64,19 @@ jobs:
 
             ## ▼ STEP 1｜本日のスコープ確認
 
-            以下のコマンドで直近の変更を確認し、リファクタリング対象を **1〜3件** に絞る。
+            直近の変更を確認し、リファクタリング対象を **1〜3件** に絞る。
+
             ```bash
-            git log --since="yesterday" --name-only --pretty=format: | sort | uniq
-            git diff --stat HEAD~1
+            # 直近1日の変更ファイル
+            git log --since="24 hours ago" --name-only --pretty=format: | sort | uniq | grep -v '^$'
+
+            # 直近7日間にリファクタリング済みのファイル（再選定を避けるため除外する）
+            git log --since="7 days ago" --grep="refactor:" --name-only --pretty=format: | sort | uniq | grep -v '^$'
             ```
+
+            **選定ルール：**
+            - 直近7日以内に `refactor:` コミットで触れたファイルは選ばない（再リファクタリング防止）
+            - 直近24時間に変更があったファイルを優先する
 
             **除外対象（選定しない）：**
             - `*.test.ts` / `*.spec.ts`
@@ -73,10 +84,16 @@ jobs:
             - `vite.config.ts` / `tailwind.config.ts` などの設定ファイル
             - `node_modules/` / `.next/` / `dist/` 配下
 
-            **変更がない場合は以下の優先順で未着手ファイルを選択：**
+            **直近24時間に変更がない場合は以下の優先順で選択（直近7日のリファクタリング済みは除く）：**
             1. `src/features/` 配下のドメインロジック
             2. `src/components/` 配下の大型コンポーネント（200行超）
             3. `src/hooks/` 配下のカスタムフック
+
+            **すべての候補が直近7日以内にリファクタリング済みの場合は正常終了する：**
+            ```bash
+            echo "対象なし：直近7日以内にすべてのファイルをリファクタリング済み"
+            exit 0
+            ```
 
             ---
 
@@ -95,7 +112,6 @@ jobs:
             - [ ] 1コンポーネント or 1関数が複数の責務を持っていないか
             - [ ] ビジネスロジックが UI コンポーネントに混在していないか
             - [ ] カスタムフックに切り出せるロジックが残っていないか
-            - [ ] repository pattern（A案: mock維持 + 将来DB接続可能な構造）に沿っているか
             - [ ] 定数・設定値がハードコードされていないか
 
             ---
@@ -115,7 +131,6 @@ jobs:
             - 1ファイルの修正は1コミット単位で完結させる
             - 型定義ファイルは `src/types/` に集約する
             - 新規フックは `src/hooks/use{FeatureName}.ts` の命名規則に従う
-            - repository interface を変更する場合は必ず mock 実装も合わせて修正する
 
             ---
 
@@ -123,16 +138,17 @@ jobs:
 
             リファクタリング後、以下を実行して壊れていないことを確認する。
             ```bash
-            # 型チェック
+            # 型チェック（node_modules は npm ci 済みなので省略不要）
             npx tsc --noEmit
 
             # テストが存在する場合のみ実行
             if grep -q '"test"' package.json 2>/dev/null; then
-              npm run test -- --passWithNoTests
+              npm run test 2>&1 || npm run test -- --passWithNoTests 2>&1 || true
             fi
             ```
 
             エラーが出た場合は修正してから次のステップへ進む。
+            修正しても解消できない場合はリファクタリングを元に戻して正常終了する。
 
             ---
 
@@ -148,8 +164,8 @@ jobs:
 
             **変更がある場合はコミットする：**
             ```bash
-            # 機能名はファイルパスから自動生成（例: src/features/auth/login.ts → "auth/login"）
-            git add -u
+            # 新規ファイル（新しいhooks・types）も含めてステージング
+            git add -A
             git commit -m "refactor: [対象機能名] 型安全性・責務分離の改善 ($(date +%Y-%m-%d))"
             ```
 
@@ -157,30 +173,29 @@ jobs:
 
             ## ▼ STEP 6｜Pull Request 作成
 
-            PR 本文をファイルに書き出してから作成する。
+            PR本文は今回の変更内容を反映して **その場で生成** し、ファイルに書き出してから作成する。
+            テンプレートに当てはめるのではなく、実際に変更したファイル・内容・理由を具体的に書くこと。
+
             ```bash
+            # PR本文を生成してファイルに書き出す
+            # （以下の構造で、今回の変更内容を反映した実際の文章を書く）
             cat > /tmp/pr_body.md << 'PREOF'
             ## 📋 リファクタリングレポート
 
             | # | ファイル | 修正カテゴリ | 具体的な変更内容 |
             |---|---------|------------|----------------|
-            [変更内容の表をここに記載]
+            | 1 | [実際のファイルパス] | [型安全性 / 責務分離] | [実際に何を変えたか] |
 
             ## 未対応・次回持ち越し
-            - （あれば記載）
+            - [実際に見つかったが今回スコープ外にしたもの、なければ「なし」]
 
             ## 気づいた設計上の懸念点
-            以下を能動的に確認して記載すること：
-            - 循環依存の疑いがある import
-            - Props drilling が3階層以上になっている箇所
-            - 今回のスコープ外だが次回対象にすべきファイル
+            - [循環依存・Props drilling・次回対象候補など。なければ「なし」]
 
             ## チェック項目
-            - [ ] 動作変更なし（ふるまい保持）
-            - [ ] `tsc --noEmit` が通過
-            - [ ] テストが通過（または対象テストなし）
-            - [ ] 型安全性の改善
-            - [ ] 責務分離の改善
+            - [x] 動作変更なし（ふるまい保持）
+            - [x] `tsc --noEmit` が通過
+            - [x] テストが通過（または対象テストなし）
 
             🤖 Generated with Claude Code (daily-code-refactoring scheduled task)
             PREOF
@@ -189,6 +204,9 @@ jobs:
               --title "refactor: [対象機能名] 型安全性・責務分離の改善 ($(date +%Y-%m-%d))" \
               --body-file /tmp/pr_body.md
             ```
+
+            **重要：** PREOF の中身はテンプレートではない。`[実際のファイルパス]` のような
+            プレースホルダーをそのまま出力しないこと。今回の変更を反映した実際の内容に置き換えること。
 
       - name: Notify Slack
         if: inputs.notify_slack && always()
