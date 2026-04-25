@@ -115,6 +115,11 @@
 | `playwright-test` | E2Eテストを書くとき |
 | `dom-explorer` | セレクタが見つからない・DOM構造を調べたいとき |
 | `vercel-deploy` | デプロイ状況を確認するとき |
+| `pdm-voice-to-problem` | ユーザーの声を問題定義に変換したいとき |
+| `pdm-design-doc` | Design Doc / 仕様書を書きたいとき |
+| `pdm-spec-to-prompt` | 仕様書を AI 実装プロンプトに変換したいとき |
+| `pdm-priority-matrix` | 機能の優先順位を整理したいとき |
+| `pdm-scope-management` | リリーススコープを Must / Should / Could / Won't に分けたいとき |
 
 <!-- TODO: このプロジェクトでよく使うスキルを追加 -->
 
