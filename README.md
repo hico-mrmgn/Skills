@@ -8,12 +8,15 @@
 
 ```
 Skills/
-├── plugins/       # 明示呼び出し型スキル（/skill-name で使う）
-├── agents/        # 並行レビュー型エージェント（観点ごとに分担）
-├── hooks/         # Hook設定テンプレート（ファイル保存時・応答終了時）
-├── templates/     # 新規プロジェクト初期化用の雛形
+├── plugins/             # 明示呼び出し型スキル（/skill-name で使う）
+├── agents/              # 並行レビュー型エージェント（観点ごとに分担）
+├── hooks/               # Hook設定テンプレート（ファイル保存時・応答終了時）
+├── templates/           # 新規プロジェクト初期化用の雛形
+│   ├── CLAUDE.md.template      # 軽量な分岐表 + R1〜R5 のみ
+│   ├── rules/                  # ドメイン別の恒常ルール（必要時に参照）
+│   └── settings.json.template
 └── .github/
-    └── workflows/ # Reusable Workflow（夜間レビュー・PR自動レビュー）
+    └── workflows/       # Reusable Workflow（夜間レビュー・PR自動レビュー）
 ```
 
 ### 使い分け
@@ -21,8 +24,11 @@ Skills/
 | 種類 | 場所 | 動き方 | 使う場面 |
 |---|---|---|---|
 | Skills | `plugins/` | 明示的に呼び出す | 「〇〇して」と指示したとき |
+| Rules | `templates/rules/` | 関連作業のとき参照 | コーディング・Git・セキュリティ等 |
 | Hooks | `hooks/`, `workflows/` | 自動実行 | ファイル保存時・会話終了時・夜間 |
 | Agents | `agents/` | 並行実行 | コードレビューを観点ごとに分担させたいとき |
+
+CLAUDE.md / rules / skills の3層分離方針は [zenn: CLAUDE.md の肥大化を 3 層構造で 83% 軽くした](https://zenn.dev/pepabo/articles/claude-code-rules-skills-split) を参照。
 
 ---
 
@@ -122,3 +128,4 @@ jobs:
 - 同じ手順を2回書いたら → `plugins/` にSkillを追加
 - 同じレビュー指摘を2回したら → `agents/` にAgentを追加
 - 同じ手動チェックを2回したら → `hooks/` か `workflows/` に自動化を追加
+- 同じ恒常ルールを2回書いたら → `templates/rules/<topic>.md` に追加（CLAUDE.mdに直書きしない）
