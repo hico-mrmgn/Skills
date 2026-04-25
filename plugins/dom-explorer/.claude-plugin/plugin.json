@@ -1,0 +1,9 @@
+{
+  "name": "dom-explorer",
+  "version": "1.0.0",
+  "description": "DOM探索・セレクタ特定・要素デバッグスキル（Playwright優先＋静的HTML対応）",
+  "author": {
+    "name": "hico-mrmgn"
+  },
+  "repository": "https://github.com/hico-mrmgn/Skills"
+}
