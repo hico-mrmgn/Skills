@@ -12,9 +12,12 @@ Skills/
 ├── agents/              # 並行レビュー型エージェント（観点ごとに分担）
 ├── hooks/               # Hook設定テンプレート（ファイル保存時・応答終了時）
 ├── templates/           # 新規プロジェクト初期化用の雛形
-│   ├── CLAUDE.md.template      # 軽量な分岐表 + R1〜R5 のみ
-│   ├── rules/                  # ドメイン別の恒常ルール（必要時に参照）
-│   └── settings.json.template
+│   ├── CLAUDE.md.template       # 軽量な分岐表 + R1〜R5 のみ
+│   ├── rules/                   # ドメイン別の恒常ルール（必要時に参照）
+│   ├── settings.json.template   # プロジェクト個別の .claude/settings.json
+│   └── user-settings.json.template  # user 全体の ~/.claude/settings.json
+├── bin/
+│   └── install.sh       # user 全体に1回だけ流すインストーラ
 └── .github/
     └── workflows/       # Reusable Workflow（夜間レビュー・PR自動レビュー）
 ```
@@ -124,43 +127,91 @@ Claude Code で：
 
 ## インストール方法
 
-### Skills（プラグイン）
+スコープが「全プロジェクトで使う user 設定」と「プロジェクト固有設定」で分かれる。
+各要素の置き場所：
 
-`~/.claude/settings.json` にマーケットプレイス登録を追加：
+| 要素 | user 全体（`~/.claude/`） | プロジェクト個別（`./.claude/` or `./CLAUDE.md`） |
+|---|---|---|
+| Skills（plugins）| `/plugin install` で1回入れれば全プロジェクトで使える | — |
+| Marketplace 登録 | `~/.claude/settings.json` の `extraKnownMarketplaces` | — |
+| Agents | `~/.claude/agents/` に置けば全プロジェクト共通 | `.claude/agents/` でプロジェクト別にも可 |
+| Hooks | `~/.claude/settings.json` の `hooks` で全プロジェクト共通 | `.claude/settings.json` でプロジェクト別 |
+| Rules（恒常ルール） | — | `.claude/rules/` がプロジェクト固有なので自然 |
+| CLAUDE.md | `~/.claude/CLAUDE.md`（user 共通） | `./CLAUDE.md`（プロジェクト固有） |
 
-```json
-"extraKnownMarketplaces": {
-  "my-skills": {
-    "source": {
-      "source": "github",
-      "repo": "hico-mrmgn/Skills"
-    }
-  }
-}
-```
+### 全プロジェクトで使う設定（推奨・1台のマシンで1回だけ）
 
-その後、Claude Code で：
-
-```
-/plugin install plugin-name@my-skills
-```
-
-### Agents（エージェント）
-
-プロジェクトの `.claude/agents/` にコピー：
+リポジトリをクローンした場所で実行：
 
 ```bash
-cp /path/to/Skills/agents/*.md .claude/agents/
+git clone https://github.com/hico-mrmgn/Skills.git ~/Skills
+cd ~/Skills
+bash bin/install.sh           # 実行前に何が起きるかプレビューしたいなら --dry-run
 ```
 
-### Hooks
+このスクリプトがやること：
 
-プロジェクトの `.claude/settings.json` に `hooks/common.json` の内容をマージ：
+1. `templates/user-settings.json.template` を `~/.claude/settings.json` に**マージ**（既存値は保護。バックアップ自動作成）
+2. `agents/*.md`（7エージェント）を `~/.claude/agents/` にコピー
+3. その後 Claude Code 内で実行する `/plugin install` コマンド一覧を表示
+
+スクリプトが**やらないこと**：
+- `hooks/common.json` の自動マージ（既存 PreToolUse を壊すリスクがあるため手動）
+- `/plugin install` の自動実行（Claude Code 内でしか動かないため対話式）
+
+要件: `jq`（`brew install jq` / `apt-get install jq`）
+
+### プラグインのインストール（Claude Code 内）
+
+`bin/install.sh` 完了後、Claude Code を起動して：
+
+```
+# Anthropic 公式（推奨）
+/plugin install commit-commands@anthropics-claude-code
+/plugin install security-guidance@anthropics-claude-code
+
+# my-skills の中核
+/plugin install code-review@my-skills
+/plugin install playwright-test@my-skills
+/plugin install dom-explorer@my-skills
+
+# PdM ワークフロー（PdM-Playbook の Skill 1〜6 をカバー）
+/plugin install pdm-voice-to-problem@my-skills
+/plugin install pdm-design-doc@my-skills
+/plugin install pdm-spec-to-prompt@my-skills
+/plugin install pdm-priority-matrix@my-skills
+/plugin install pdm-scope-management@my-skills
+
+# ドメイン特化（必要なものだけ）
+/plugin install vercel-deploy@my-skills
+/plugin install nextjs-mockup@my-skills
+/plugin install lp-creator@my-skills
+/plugin install report-generator@my-skills
+/plugin install municipality-data@my-skills
+/plugin install data-analysis@my-skills
+/plugin install business-email@my-skills
+/plugin install competitor-research@my-skills
+/plugin install claude-code-workflow@my-skills
+```
+
+一度入れた plugin は user 全体で永続化されるので、次のプロジェクトでは何もしなくて良い。
+
+### プロジェクト個別の初期化（新規プロジェクトごと）
 
 ```bash
-# 雛形からsettings.jsonを作成
-cp /path/to/Skills/templates/settings.json.template .claude/settings.json
+# プロジェクトのルートで
+cp ~/Skills/templates/CLAUDE.md.template ./CLAUDE.md
+mkdir -p .claude/rules
+cp ~/Skills/templates/rules/*.md .claude/rules/
 ```
+
+`CLAUDE.md` の `<!-- TODO -->` を埋める。`rules/*.md` も必要なら追記する。
+
+### 危険コマンドブロック hooks（任意）
+
+`hooks/common.json` は `rm -rf /` `git push --force` `DROP TABLE` をブロックするフック。
+入れたい場合、`~/.claude/settings.json` の `hooks.PreToolUse` に**手動で**マージ。
+既存 PreToolUse があると配列が衝突するので、自動化はしていない。
 
 ### Reusable Workflow（夜間レビュー）
 

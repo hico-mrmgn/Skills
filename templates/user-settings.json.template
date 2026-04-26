@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "my-skills": {
+      "source": {
+        "source": "github",
+        "repo": "hico-mrmgn/Skills"
+      }
+    }
+  }
+}

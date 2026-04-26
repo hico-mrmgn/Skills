@@ -16,43 +16,46 @@
 
 ## ファイル一覧
 
-| ファイル | 用途 |
-|---|---|
-| [CLAUDE.md.template](./CLAUDE.md.template) | プロジェクトCLAUDE.mdの雛形（分岐表 + R1〜R5） |
-| [rules/coding.md](./rules/coding.md) | コーディング恒常ルール |
-| [rules/security.md](./rules/security.md) | セキュリティ恒常ルール |
-| [rules/git.md](./rules/git.md) | Git 操作恒常ルール |
-| [rules/process.md](./rules/process.md) | 作業プロセス恒常ルール |
-| [rules/anti-patterns.md](./rules/anti-patterns.md) | やりがちな事故パターン集 |
-| [settings.json.template](./settings.json.template) | `.claude/settings.json`の雛形 |
+| ファイル | 配置先 | 用途 |
+|---|---|---|
+| [CLAUDE.md.template](./CLAUDE.md.template) | プロジェクトルート | プロジェクト CLAUDE.md の雛形（分岐表 + R1〜R5） |
+| [rules/coding.md](./rules/coding.md) | `.claude/rules/` | コーディング恒常ルール |
+| [rules/security.md](./rules/security.md) | `.claude/rules/` | セキュリティ恒常ルール |
+| [rules/git.md](./rules/git.md) | `.claude/rules/` | Git 操作恒常ルール |
+| [rules/process.md](./rules/process.md) | `.claude/rules/` | 作業プロセス恒常ルール |
+| [rules/anti-patterns.md](./rules/anti-patterns.md) | `.claude/rules/` | やりがちな事故パターン集 |
+| [settings.json.template](./settings.json.template) | `.claude/settings.json` | プロジェクト個別の Claude Code 設定 |
+| [user-settings.json.template](./user-settings.json.template) | `~/.claude/settings.json` | user 全体の Claude Code 設定（marketplace 登録） |
 
 ## 使い方
 
-`/init-project` スキルを使うと自動で展開される。
+### user 全体のセットアップ（1回だけ）
 
-手動で使う場合：
+リポジトリのルートで：
+
+```bash
+bash bin/install.sh
+```
+
+これで `~/.claude/settings.json` への marketplace 登録と `~/.claude/agents/` への agents コピーが完了する。詳細はルートの [README.md「インストール方法」](../README.md#インストール方法) を参照。
+
+### プロジェクト個別のセットアップ（新規プロジェクトごと）
+
 ```bash
 # CLAUDE.md を雛形からコピー
-cp /path/to/Skills/templates/CLAUDE.md.template CLAUDE.md
+cp /path/to/Skills/templates/CLAUDE.md.template ./CLAUDE.md
 
 # rules/ 一式をコピー
 mkdir -p .claude/rules
 cp /path/to/Skills/templates/rules/*.md .claude/rules/
+```
 
-# settings.json を雛形からコピー
+`settings.json.template` はプロジェクト固有の hook を入れたいときだけ使う（user 全体に同じ hook が入っているなら不要）：
+
+```bash
 mkdir -p .claude
 cp /path/to/Skills/templates/settings.json.template .claude/settings.json
 ```
-
-そのあと Claude Code で**推奨公式プラグイン**を入れる：
-
-```
-/plugin install commit-commands@anthropics-claude-code
-/plugin install security-guidance@anthropics-claude-code
-```
-
-- `commit-commands`: `/commit` `/commit-push-pr` `/clean_gone` を提供
-- `security-guidance`: `Write/Edit` 時に脆弱パターン（XSS・eval・pickle 等）を自動警告
 
 ## カスタマイズ方針
 
