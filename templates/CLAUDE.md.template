@@ -121,6 +121,15 @@
 | `pdm-priority-matrix` | 機能の優先順位を整理したいとき |
 | `pdm-scope-management` | リリーススコープを Must / Should / Could / Won't に分けたいとき |
 
+### Anthropic 公式プラグイン（`anthropics-claude-code`）
+
+| コマンド/フック | 使うタイミング |
+|---|---|
+| `/commit` | コミットを作るとき（メッセージ自動生成） |
+| `/commit-push-pr` | コミット → push → PR 作成を一気に行うとき |
+| `/clean_gone` | リモートで消えたローカルブランチを掃除するとき |
+| `security-guidance`（自動） | `Write/Edit` 時に XSS・eval・pickle 等の脆弱パターンを警告（フック） |
+
 <!-- TODO: このプロジェクトでよく使うスキルを追加 -->
 
 ### 並行レビュー（`.claude/agents/`）

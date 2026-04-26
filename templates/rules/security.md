@@ -24,6 +24,10 @@ SQL は ORM / プリペアドステートメント経由でのみ実行する。
 `.env` / `credentials.json` / `*.pem` などはコミットしない。
 `git add -A` / `git add .` を使わず、ファイルを名指しでステージする。
 
+## S5. `security-guidance` の警告を無視しない
+
+公式プラグイン `security-guidance` が `Write/Edit` 時に出す警告（XSS・`eval`・`pickle`・command injection など）は必ず確認する。「警告は出たが動くからそのまま」を選ばない。修正アドバイスに従うか、安全な代替手段に置き換える。
+
 <!-- TODO: プロジェクト固有のセキュリティルールを追加する
 
 例（Supabase を使っている場合）:

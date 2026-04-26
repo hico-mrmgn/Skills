@@ -44,6 +44,16 @@ mkdir -p .claude
 cp /path/to/Skills/templates/settings.json.template .claude/settings.json
 ```
 
+そのあと Claude Code で**推奨公式プラグイン**を入れる：
+
+```
+/plugin install commit-commands@anthropics-claude-code
+/plugin install security-guidance@anthropics-claude-code
+```
+
+- `commit-commands`: `/commit` `/commit-push-pr` `/clean_gone` を提供
+- `security-guidance`: `Write/Edit` 時に脆弱パターン（XSS・eval・pickle 等）を自動警告
+
 ## カスタマイズ方針
 
 - **CLAUDE.md.template** — `<!-- TODO -->` を埋める。**新ルールを直書きしない**（rules/ に追加する）

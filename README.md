@@ -74,6 +74,37 @@ to-problem           （Skill 2-3 を統合）                           to-prom
 
 ---
 
+## 推奨される Anthropic 公式プラグイン
+
+当リポのスキル群と組み合わせて使うと効果的な、Anthropic 公式マーケットプレイス（`anthropics-claude-code`）のプラグイン。公式マーケットプレイスは Claude Code 起動時に自動で利用可能。
+
+| プラグイン | 役割 | 当リポとの関係 |
+|---|---|---|
+| [`commit-commands`](https://claude.com/plugins/commit-commands) | `/commit` `/commit-push-pr` `/clean_gone` で Git コミット・PR 作成・ブランチ掃除を自動化 | 当リポに無い機能を補完。`templates/rules/git.md` のメッセージ規約と整合 |
+| [`security-guidance`](https://claude.com/plugins/security-guidance) | `Write` / `Edit` / `MultiEdit` 時に XSS・eval・pickle・command injection 等の脆弱パターンを `PreToolUse` フックで検出・警告 | 当リポの `hooks/common.json`（コマンド単位のブロック）とは別レイヤー。コード**内容**の即時警告を担当 |
+
+### インストール
+
+Claude Code で：
+
+```
+/plugin install commit-commands@anthropics-claude-code
+/plugin install security-guidance@anthropics-claude-code
+```
+
+両方ともコマンド/フックは自動で有効化される。`security-guidance` は警告がセッション単位で1回のみ表示されるので疲労感が少ない。
+
+### 当リポのスキル群との使い分け
+
+- **コミット**: 通常は `/commit`（公式）。`templates/rules/git.md` の G2〜G5 を破らない範囲で使う
+- **セキュリティ**:
+  - 実装中の即時検知 → `security-guidance`（公式・自動）
+  - PR 段階のレビュー → `agents/security-reviewer.md`（並行レビュー）
+  - 恒常ルール → `templates/rules/security.md`
+  - コマンドブロック（rm -rf 等） → `hooks/common.json`
+
+---
+
 ## エージェント（Agents）一覧
 
 並行レビュー型。各エージェントは1つの観点だけを担当する。
