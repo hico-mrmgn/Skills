@@ -109,6 +109,8 @@
 
 ### 使えるスキル（`my-skills` マーケットプレイス）
 
+汎用スキルの抜粋。全プラグイン一覧は [Skills リポジトリ README](https://github.com/hico-mrmgn/Skills#プラグインskills一覧) を参照。
+
 | スキル | 使うタイミング |
 |---|---|
 | `code-review` | コードの品質を7軸で採点したいとき |
@@ -134,13 +136,19 @@
 
 ### 並行レビュー（`.claude/agents/`）
 
-「並行でレビューして」と指示すると以下が同時に走る：
+「並行でレビューして」と指示すると、`.claude/agents/` に置いた以下のエージェントが同時に走る：
 
-- `security-reviewer` — セキュリティ観点（最優先）
-- `yagni-reviewer` — スコープ遵守・YAGNI
-- `dead-code-reviewer` — デッドコード検出
+| エージェント | 観点 | 優先度 |
+|---|---|---|
+| `security-reviewer` | セキュリティ（OWASP Top 10・秘密情報露出） | 最優先 |
+| `yagni-reviewer` | スコープ遵守・YAGNI | 高 |
+| `dead-code-reviewer` | デッドコード | 高 |
+| `abstraction-reviewer` | 抽象化の適切さ | 中 |
+| `error-handling-reviewer` | エラーハンドリング | 中 |
+| `naming-reviewer` | 命名・可読性 | 中 |
+| `comment-reviewer` | コメントの品質 | 中 |
 
-全観点まとめは `code-review` スキルを使う。
+`code-review` スキルを呼ぶと7観点の総合採点を一度に得られる。観点を絞って深く見たいときは個別エージェントを `.claude/agents/` にコピーして並行実行する。
 
 ---
 
