@@ -1,0 +1,9 @@
+{
+  "name": "issue-intake",
+  "version": "1.0.0",
+  "description": "As-Is / To-Be 形式の要望から GitHub Issue を起票するスキル(重複チェック付き)",
+  "author": {
+    "name": "hico-mrmgn"
+  },
+  "repository": "https://github.com/hico-mrmgn/Skills"
+}
