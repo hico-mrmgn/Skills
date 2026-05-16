@@ -1,7 +1,7 @@
 {
   "name": "vercel-deploy",
   "version": "1.0.0",
-  "description": "Vercel デプロイ管理スキル（mrmgn チーム）",
+  "description": "Vercel デプロイ管理スキル",
   "author": {
     "name": "hico-mrmgn"
   },

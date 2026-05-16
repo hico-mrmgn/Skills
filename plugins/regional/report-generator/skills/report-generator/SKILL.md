@@ -7,7 +7,7 @@ description: 自治体向け実施報告書（Word/.docx）とスライド（Pow
 
 Node.js で `.docx`（Word報告書）と `.pptx`（PowerPointスライド）を自動生成するワークフロー。
 
-**プロジェクトルート:** `/Users/katotomohico/Desktop/移住のすゝめ/`
+**プロジェクトルート:** `<your-project-root>/`（自分のプロジェクトに合わせて置き換える）
 **報告書スクリプト:** `create_report.js`（`docx` ライブラリ使用）
 **スライドスクリプト:** `create_slides.js`（`pptxgenjs` ライブラリ使用）
 
@@ -18,8 +18,8 @@ Node.js で `.docx`（Word報告書）と `.pptx`（PowerPointスライド）を
 ### Step 1: ディレクトリと画像を用意する
 
 ```bash
-mkdir -p /Users/katotomohico/Desktop/移住のすゝめ/{自治体名}/
-# 例: mkdir -p /Users/katotomohico/Desktop/移住のすゝめ/音威子府/
+mkdir -p <your-project-root>/{自治体名}/
+# 例: mkdir -p ~/projects/regional-report/音威子府/
 ```
 
 画像ファイルをそのディレクトリに配置する：
@@ -39,7 +39,7 @@ mkdir -p /Users/katotomohico/Desktop/移住のすゝめ/{自治体名}/
     "reportTitle": "地域おこし協力隊募集及びお試し移住ツアー実施報告書",
     "submittedTo": "音威子府村役場",
     "reportDate": "令和7年3月",
-    "imageDir": "/Users/katotomohico/Desktop/移住のすゝめ/音威子府/",
+    "imageDir": "<your-project-root>/音威子府/",
     "images": {
       "photo1": "IMG_0001.jpg",
       "photo2": "IMG_0002.jpg",
@@ -82,7 +82,7 @@ const { name, imageDir, images } = config.municipality;
 ### Step 3: スクリプトを実行する
 
 ```bash
-cd /Users/katotomohico/Desktop/移住のすゝめ
+cd <your-project-root>
 npm install          # 初回のみ
 node create_report.js
 node create_slides.js
@@ -287,7 +287,7 @@ s.addText('自治体名', { x: 1, y: 1.5, w: 8, h: 0.8, fontSize: 28, color: C.w
 s.addText('報告書タイトル', { x: 1, y: 2.3, w: 8, h: 1.2, fontSize: 36, color: C.white, fontFace: FONT, bold: true });
 // サブテキスト
 s.addText([
-  { text: '実施主体：一般社団法人移住のすゝめ', options: { breakLine: true } },
+  { text: '実施主体：〇〇（実施団体名）', options: { breakLine: true } },
   { text: '提出先：〇〇役場', options: { breakLine: true } },
   { text: '報告日：令和〇年〇月', options: {} },
 ], { x: 1, y: 4.0, w: 8, h: 1.0, fontSize: 14, color: C.white, fontFace: FONT });
