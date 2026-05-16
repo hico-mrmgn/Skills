@@ -1,0 +1,92 @@
+{
+  "name": "my-skills",
+  "owner": {
+    "name": "hico-mrmgn"
+  },
+  "plugins": [
+    {
+      "name": "pdm-design-doc",
+      "source": "./plugins/pdm/pdm-design-doc",
+      "description": "PdM Design Doc作成・仕様書変換ワークフロースキル",
+      "category": "pdm"
+    },
+    {
+      "name": "competitor-research",
+      "source": "./plugins/pdm/competitor-research",
+      "description": "競合調査・比較表・市場分析レポートの作成スキル",
+      "category": "pdm"
+    },
+    {
+      "name": "business-email",
+      "source": "./plugins/pdm/business-email",
+      "description": "ビジネスメール・提案書・議事録などビジネス文書の作成スキル",
+      "category": "pdm"
+    },
+    {
+      "name": "data-analysis",
+      "source": "./plugins/pdm/data-analysis",
+      "description": "CSV/ExcelデータをPython/Pandasで分析するスキル",
+      "category": "pdm"
+    },
+    {
+      "name": "issue-intake",
+      "source": "./plugins/pdm/issue-intake",
+      "description": "As-Is/To-Be形式の要望からGitHub Issueを起票するスキル（重複チェック付き）",
+      "category": "pdm"
+    },
+    {
+      "name": "municipality-data",
+      "source": "./plugins/regional/municipality-data",
+      "description": "市区町村データ収集・スクレイピングワークフロースキル",
+      "category": "regional"
+    },
+    {
+      "name": "report-generator",
+      "source": "./plugins/regional/report-generator",
+      "description": "自治体向け実施報告書（.docx）とスライド（.pptx）の自動生成スキル",
+      "category": "regional"
+    },
+    {
+      "name": "nextjs-mockup",
+      "source": "./plugins/dev/nextjs-mockup",
+      "description": "Next.js App Router モックアップへの機能追加ワークフロースキル",
+      "category": "dev"
+    },
+    {
+      "name": "lp-creator",
+      "source": "./plugins/dev/lp-creator",
+      "description": "スタンドアロンLP（HTML/CSS/JS）作成スキル",
+      "category": "dev"
+    },
+    {
+      "name": "playwright-test",
+      "source": "./plugins/dev/playwright-test",
+      "description": "Playwright E2Eテスト作成スキル",
+      "category": "dev"
+    },
+    {
+      "name": "vercel-deploy",
+      "source": "./plugins/dev/vercel-deploy",
+      "description": "Vercel デプロイ管理スキル（mrmgn チーム）",
+      "category": "dev"
+    },
+    {
+      "name": "code-review",
+      "source": "./plugins/dev/code-review",
+      "description": "コードを分析・採点し、改善点をフィードバックするスキル",
+      "category": "dev"
+    },
+    {
+      "name": "claude-code-workflow",
+      "source": "./plugins/dev/claude-code-workflow",
+      "description": "Claude Code を使った日次コード分析・自動リファクタリングパイプラインの設計スキル",
+      "category": "dev"
+    },
+    {
+      "name": "github-issue-pr-flow",
+      "source": "./plugins/dev/github-issue-pr-flow",
+      "description": "GitHub Issue → Branch → PR ワークフロースキル",
+      "category": "dev"
+    }
+  ]
+}
