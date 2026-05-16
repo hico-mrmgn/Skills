@@ -29,4 +29,4 @@ cp /path/to/Skills/agents/*.md .claude/agents/
 各エージェントは「この観点だけを見る」と明記されている。
 これにより、Claude Code が並行でエージェントを実行しても観点が重複しない。
 
-全観点をまとめてレビューしたい場合は `plugins/code-review` のスキルを使う。
+全観点をまとめてレビューしたい場合は `plugins/dev/code-review` のスキルを使う。
