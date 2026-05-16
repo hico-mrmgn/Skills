@@ -1,0 +1,9 @@
+{
+  "name": "github-issue-pr-flow",
+  "version": "1.0.0",
+  "description": "GitHub Issue → Branch → PR ワークフロースキル",
+  "author": {
+    "name": "hico-mrmgn"
+  },
+  "repository": "https://github.com/hico-mrmgn/Skills"
+}
