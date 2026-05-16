@@ -303,10 +303,3 @@ gh label create "priority/low"    --color "0e8a16"
 | Issue が重複する | 前回のものがクローズされていない | クローズ済みIssueを除外するフィルタをスクリプトに追加 |
 | Slack 通知が届かない | Webhook URL が未設定 or 無効 | GitHub Secrets の `SLACK_WEBHOOK_URL` を確認 |
 
----
-
-## プロダクト別メモ
-
-- **manaable**: Next.js App Router + TypeScript。src/features/ ドメイン構造。リリースは火曜。
-- **Lipass**: 保険コンプライアンス向け。src/types/ に型を集約、カスタムフックは `use{FeatureName}.ts` 命名。
-- **LIMS**: 検査情報管理。（随時追記）

@@ -67,7 +67,7 @@
     {
       "name": "vercel-deploy",
       "source": "./plugins/dev/vercel-deploy",
-      "description": "Vercel デプロイ管理スキル（mrmgn チーム）",
+      "description": "Vercel デプロイ管理スキル",
       "category": "dev"
     },
     {
