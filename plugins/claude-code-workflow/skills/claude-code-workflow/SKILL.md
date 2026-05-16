@@ -10,7 +10,6 @@ description: >
 
 # Claude Code Workflow Skill
 
-Tomoさん（manaable / Lipass / LIMS）のプロジェクトで蓄積された、
 Claude Code を使った自動コード品質改善パイプラインのベストプラクティス集。
 
 ---
